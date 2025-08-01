@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "title": "Scientific Math",
+    "image": "/images/math.jpg",
+    "price": "150"
+  },
+  {
+    "id": 2,
+    "title": "Roblox",
+    "image": "/images/roblox.jpg",
+    "price": "120"
+  }
+]
