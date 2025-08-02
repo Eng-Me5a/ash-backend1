@@ -5,7 +5,9 @@ const path = require("path");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
-
+app.get("/", (req, res) => {
+  res.send("✅ API is running");
+});
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -139,11 +141,9 @@ app.delete("/orders/:id", async (req, res) => {
   await Order.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
-app.get("/", (req, res) => {
-  res.send("✅ API is running");
-});
+
 // ✅ تشغيل السيرفر
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   
