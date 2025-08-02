@@ -15,7 +15,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
-// ✅ تعريف Schema
+// ✅ تعريف الـ Schemas
 const productSchema = new mongoose.Schema({
   name: String,
   price: Number,
@@ -28,12 +28,17 @@ const AllProduct = mongoose.model("AllProduct", productSchema);
 const Collection = mongoose.model("Collection", productSchema);
 const BestSeller = mongoose.model("BestSeller", productSchema);
 
+// ✅ Route تجريبي للتأكد من عمل الـ API
+app.get("/", (req, res) => {
+  res.send("✅ API is working");
+});
+
 // ✅ Endpoints لـ BestProduct
 app.get("/bestproduct", async (req, res) => {
   const data = await BestProduct.find();
   res.json(data);
 });
-app.post("/api/bestproduct", async (req, res) => {
+app.post("/bestproduct", async (req, res) => {
   const product = new BestProduct(req.body);
   await product.save();
   res.status(201).json(product);
@@ -89,6 +94,7 @@ app.delete("/bestseller/:id", async (req, res) => {
 });
 
 // ✅ تشغيل السيرفر
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`✅ Server running on port ${process.env.PORT || 5000}`);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
