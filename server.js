@@ -5,10 +5,11 @@ const path = require("path");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
+
+const app = express();
 app.get("/", (req, res) => {
   res.send("✅ API is running");
 });
-const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
