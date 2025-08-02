@@ -139,14 +139,14 @@ app.delete("/orders/:id", async (req, res) => {
   await Order.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
-
+app.get("/", (req, res) => {
+  res.send("✅ API is running");
+});
 // ✅ تشغيل السيرفر
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   
 });
-app.get("/", (req, res) => {
-  res.send("✅ API is running");
-});
+
 
