@@ -1,66 +1,147 @@
+// server.js أو index.js
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const app = express();
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-// قواعد بيانات وهمية
-let bestproduct = [];
-let allproducts = [];
-let collections = [];
-let bestseller = []; // ✅ القسم الجديد
+// ✅ الاتصال بقاعدة البيانات
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
-// ✅ Endpoints لإدارة bestproduct
-app.get("/bestproduct", (req, res) => res.json(bestproduct));
-app.post("/bestproduct", (req, res) => {
-  const newProduct = { id: Date.now(), ...req.body };
-  bestproduct.push(newProduct);
-  res.status(201).json(newProduct);
+// ✅ Schemas
+const productSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  imageUrl: String,
+  category: String,
+}, { timestamps: true });
+
+const orderSchema = new mongoose.Schema({
+  customer: {
+    name: String,
+    address: String,
+    phone: String,
+    notes: String,
+  },
+  cart: [
+    {
+      id: Number,
+      title: String,
+      price: String,
+      quantity: Number,
+    }
+  ],
+  total: Number,
+  status: { type: String, default: "" },
+  date: { type: Date, default: Date.now }
 });
-app.delete("/bestproduct/:id", (req, res) => {
-  bestproduct = bestproduct.filter(p => p.id != req.params.id);
+
+const BestProduct = mongoose.model("BestProduct", productSchema);
+const AllProduct = mongoose.model("AllProduct", productSchema);
+const Collection = mongoose.model("Collection", productSchema);
+const BestSeller = mongoose.model("BestSeller", productSchema);
+const Order = mongoose.model("Order", orderSchema);
+
+// ✅ Endpoints للمنتجات
+
+// BestProduct
+app.get("/bestproduct", async (req, res) => {
+  const data = await BestProduct.find();
+  res.json(data);
+});
+app.post("/bestproduct", async (req, res) => {
+  const product = new BestProduct(req.body);
+  await product.save();
+  res.status(201).json(product);
+});
+app.delete("/bestproduct/:id", async (req, res) => {
+  await BestProduct.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
-// ✅ Endpoints لإدارة allproducts
-app.get("/allproducts", (req, res) => res.json(allproducts));
-app.post("/allproducts", (req, res) => {
-  const newProduct = { id: Date.now(), ...req.body };
-  allproducts.push(newProduct);
-  res.status(201).json(newProduct);
+// AllProduct
+app.get("/allproducts", async (req, res) => {
+  const data = await AllProduct.find();
+  res.json(data);
 });
-app.delete("/allproducts/:id", (req, res) => {
-  allproducts = allproducts.filter(p => p.id != req.params.id);
+app.post("/allproducts", async (req, res) => {
+  const product = new AllProduct(req.body);
+  await product.save();
+  res.status(201).json(product);
+});
+app.delete("/allproducts/:id", async (req, res) => {
+  await AllProduct.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
-// ✅ Endpoints لإدارة collections
-app.get("/collections", (req, res) => res.json(collections));
-app.post("/collections", (req, res) => {
-  const newProduct = { id: Date.now(), ...req.body };
-  collections.push(newProduct);
-  res.status(201).json(newProduct);
+// Collection
+app.get("/collections", async (req, res) => {
+  const data = await Collection.find();
+  res.json(data);
 });
-app.delete("/collections/:id", (req, res) => {
-  collections = collections.filter(p => p.id != req.params.id);
+app.post("/collections", async (req, res) => {
+  const product = new Collection(req.body);
+  await product.save();
+  res.status(201).json(product);
+});
+app.delete("/collections/:id", async (req, res) => {
+  await Collection.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
-// ✅ Endpoints لإدارة bestseller
-app.get("/bestseller", (req, res) => res.json(bestseller));
-app.post("/bestseller", (req, res) => {
-  const newProduct = { id: Date.now(), ...req.body };
-  bestseller.push(newProduct);
-  res.status(201).json(newProduct);
+// BestSeller
+app.get("/bestseller", async (req, res) => {
+  const data = await BestSeller.find();
+  res.json(data);
 });
-app.delete("/bestseller/:id", (req, res) => {
-  bestseller = bestseller.filter(p => p.id != req.params.id);
+app.post("/bestseller", async (req, res) => {
+  const product = new BestSeller(req.body);
+  await product.save();
+  res.status(201).json(product);
+});
+app.delete("/bestseller/:id", async (req, res) => {
+  await BestSeller.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
-app.listen(5000, () => {
-  console.log("✅ Server running on port 5000");
+// ✅ Endpoints للطلبات (Orders)
+
+// عرض كل الطلبات
+app.get("/orders", async (req, res) => {
+  const orders = await Order.find().sort({ date: -1 });
+  res.json(orders);
+});
+
+// إنشاء طلب جديد
+app.post("/orders", async (req, res) => {
+  const order = new Order(req.body);
+  await order.save();
+  res.status(201).json(order);
+});
+
+// تحديث حالة الطلب
+app.put("/orders/:id", async (req, res) => {
+  const { status } = req.body;
+  const updated = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+  res.json(updated);
+});
+
+// حذف طلب
+app.delete("/orders/:id", async (req, res) => {
+  await Order.findByIdAndDelete(req.params.id);
+  res.sendStatus(204);
+});
+
+// ✅ تشغيل السيرفر
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
