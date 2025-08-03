@@ -42,6 +42,7 @@ const orderSchema = new mongoose.Schema({
     }
   ],
   total: Number,
+  status: { type: String, default: "جديد" } 
 }, { timestamps: true });
 
 const BestProduct = mongoose.model("BestProduct", productSchema);
@@ -96,7 +97,24 @@ app.delete("/orders/:id", async (req, res) => {
   await Order.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
-
+// تحديث حالة الطلب
+app.patch("/orders/:id", async (req, res) => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: req.body.status } },
+      { new: true }
+    );
+    
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "الطلب غير موجود" });
+    }
+    
+    res.json(updatedOrder);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 // Collections
 app.get("/collections", async (req, res) => {
   const data = await Collection.find();
