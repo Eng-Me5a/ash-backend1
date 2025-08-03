@@ -3,7 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const { default: AdminOrdersPage } = require("../pages/AdminOrdersPage");
+
 
 dotenv.config();
 
@@ -66,16 +66,16 @@ app.delete("/allproducts/:id", async (req, res) => {
 });
 // orders
 app.get("/orders", async (req, res) => {
-  const data = await AdminOrdersPage.find();
+  const data = await Orders.find();
   res.json(data);
 });
 app.post("/orders", async (req, res) => {
-  const product = new AdminOrdersPage(req.body);
+  const product = new Orders(req.body);
   await product.save();
   res.status(201).json(product);
 });
 app.delete("/orders/:id", async (req, res) => {
-  await AdminOrdersPage.findByIdAndDelete(req.params.id);
+  await Orders.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
