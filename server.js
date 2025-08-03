@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const { default: AdminOrdersPage } = require("../pages/AdminOrdersPage");
 
 dotenv.config();
 
@@ -31,7 +32,7 @@ const BestProduct = mongoose.model("BestProduct", productSchema);
 const AllProduct = mongoose.model("AllProduct", productSchema);
 const Collection = mongoose.model("Collection", productSchema);
 const BestSeller = mongoose.model("BestSeller", productSchema);
-
+const Orders = mongoose.model("Orders", productSchema);
 // ✅ Endpoints لكل قسم
 
 // BestProduct
@@ -61,6 +62,20 @@ app.post("/allproducts", async (req, res) => {
 });
 app.delete("/allproducts/:id", async (req, res) => {
   await AllProduct.findByIdAndDelete(req.params.id);
+  res.sendStatus(204);
+});
+// orders
+app.get("/orders", async (req, res) => {
+  const data = await AdminOrdersPage.find();
+  res.json(data);
+});
+app.post("/orders", async (req, res) => {
+  const product = new AdminOrdersPage(req.body);
+  await product.save();
+  res.status(201).json(product);
+});
+app.delete("/orders/:id", async (req, res) => {
+  await AdminOrdersPage.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 });
 
