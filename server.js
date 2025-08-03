@@ -115,6 +115,13 @@ app.patch("/orders/:id", async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+app.patch("/orders/:id", async (req, res) => {
+  const { status } = req.body;
+  
+  if (!["جديد", "قيد التجهيز", "مكتمل"].includes(status)) {
+    return res.status(400).json({ message: "حالة الطلب غير صالحة" });
+  }
+});
 // Collections
 app.get("/collections", async (req, res) => {
   const data = await Collection.find();
